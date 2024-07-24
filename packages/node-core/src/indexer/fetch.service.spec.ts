@@ -6,7 +6,7 @@ import {SchedulerRegistry} from '@nestjs/schedule';
 import {BaseDataSource, BaseHandler, BaseMapping, DictionaryQueryEntry, IProjectNetworkConfig} from '@subql/types-core';
 import {range} from 'lodash';
 import {
-  BaseUnfinalizedBlocksService,
+  UnfinalizedBlocksService,
   BlockDispatcher,
   delay,
   Header,
@@ -14,6 +14,7 @@ import {
   IBlockDispatcher,
   IProjectService,
   NodeConfig,
+  IBlockchainService,
 } from '../';
 import {BlockHeightMap} from '../utils/blockHeightMap';
 import {DictionaryService} from './dictionary/dictionary.service';
@@ -166,7 +167,8 @@ describe('Fetch Service', () => {
   let dictionaryService: DictionaryService<any, any>;
   let networkConfig: IProjectNetworkConfig;
   let dataSources: BaseDataSource[];
-  let unfinalizedBlocksService: BaseUnfinalizedBlocksService<any>;
+  let unfinalizedBlocksService: UnfinalizedBlocksService<any>;
+  let blockchainService: IBlockchainService;
 
   let spyOnEnqueueSequential: jest.SpyInstance<
     void | Promise<void>,
@@ -216,7 +218,8 @@ describe('Fetch Service', () => {
         metadata: {
           set: jest.fn(),
         },
-      } as any
+      } as any,
+      blockchainService
     );
 
     spyOnEnqueueSequential = jest.spyOn(fetchService as any, 'enqueueSequential') as any;
