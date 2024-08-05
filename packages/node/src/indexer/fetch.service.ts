@@ -10,18 +10,18 @@ import {
   StoreCacheService,
   UnfinalizedBlocksService,
   ProjectService,
+  IBlockDispatcher,
 } from '@subql/node-core';
 import { SubstrateDatasource, SubstrateBlock } from '@subql/types';
 import { BlockchainService } from '../blockchain.service';
 import { SubqueryProject } from '../configure/SubqueryProject';
-import { ISubstrateBlockDispatcher } from './blockDispatcher/substrate-block-dispatcher';
 import { SubstrateDictionaryService } from './dictionary/substrateDictionary.service';
 import { RuntimeService } from './runtime/runtimeService';
 
 @Injectable()
 export class FetchService extends BaseFetchService<
   SubstrateDatasource,
-  ISubstrateBlockDispatcher,
+  IBlockDispatcher<SubstrateBlock>,
   SubstrateBlock
 > {
   constructor(
@@ -30,13 +30,13 @@ export class FetchService extends BaseFetchService<
     projectService: ProjectService<SubstrateDatasource>,
     @Inject('ISubqueryProject') project: SubqueryProject,
     @Inject('IBlockDispatcher')
-    blockDispatcher: ISubstrateBlockDispatcher,
+    blockDispatcher: IBlockDispatcher<SubstrateBlock>,
     dictionaryService: SubstrateDictionaryService,
     @Inject('IUnfinalizedBlocksService')
     unfinalizedBlocksService: UnfinalizedBlocksService<SubstrateBlock>,
     eventEmitter: EventEmitter2,
     schedulerRegistry: SchedulerRegistry,
-    private runtimeService: RuntimeService,
+    @Inject('RuntimeService') private runtimeService: RuntimeService,
     storeCacheService: StoreCacheService,
     @Inject('IBlockchainService') blockchainService: BlockchainService,
   ) {
@@ -55,10 +55,7 @@ export class FetchService extends BaseFetchService<
   }
 
   protected async initBlockDispatcher(): Promise<void> {
-    await this.blockDispatcher.init(
-      this.resetForNewDs.bind(this),
-      this.runtimeService,
-    );
+    await this.blockDispatcher.init(this.resetForNewDs.bind(this));
   }
 
   protected async preLoopHook({
