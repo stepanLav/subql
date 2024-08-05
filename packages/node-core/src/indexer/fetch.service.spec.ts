@@ -15,6 +15,7 @@ import {
   IProjectService,
   NodeConfig,
   IBlockchainService,
+  ISubqueryProject,
 } from '../';
 import {BlockHeightMap} from '../utils/blockHeightMap';
 import {DictionaryService} from './dictionary/dictionary.service';
@@ -208,7 +209,7 @@ describe('Fetch Service', () => {
     fetchService = new TestFetchService(
       nodeConfig,
       projectService,
-      networkConfig,
+      {network: networkConfig} as ISubqueryProject,
       blockDispatcher,
       dictionaryService,
       eventEmitter,
