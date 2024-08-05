@@ -3,7 +3,7 @@
 
 import assert from 'assert';
 import util from 'util';
-import {OnApplicationShutdown} from '@nestjs/common';
+import {Inject, Injectable, OnApplicationShutdown} from '@nestjs/common';
 import {EventEmitter2} from '@nestjs/event-emitter';
 import {SchedulerRegistry} from '@nestjs/schedule';
 import {BaseDataSource, IProjectNetworkConfig} from '@subql/types-core';
@@ -18,37 +18,35 @@ import {mergeNumAndBlocksToNums} from './dictionary';
 import {DictionaryService} from './dictionary/dictionary.service';
 import {getBlockHeight, mergeNumAndBlocks} from './dictionary/utils';
 import {StoreCacheService} from './storeCache';
-import {IBlock, IProjectService} from './types';
+import {IBlock, IProjectService, ISubqueryProject} from './types';
 import {IUnfinalizedBlocksServiceUtil} from './unfinalizedBlocks.service';
 
 const logger = getLogger('FetchService');
 
-export abstract class BaseFetchService<DS extends BaseDataSource, B extends IBlockDispatcher<FB>, FB>
+@Injectable()
+export class FetchService<DS extends BaseDataSource, B extends IBlockDispatcher<FB>, FB>
   implements OnApplicationShutdown
 {
   private _latestBestHeight?: number;
   private _latestFinalizedHeight?: number;
   private isShutdown = false;
   private bypassBlocks: number[] = [];
-
-  protected abstract initBlockDispatcher(): Promise<void>;
-
-  // Gets called just before the loop is started
-  // Used by substrate to init runtime service and get runtime version data from the dictionary
-  protected abstract preLoopHook(data: {startHeight: number}): Promise<void>;
+  private networkConfig: IProjectNetworkConfig;
 
   constructor(
     private nodeConfig: NodeConfig,
-    protected projectService: IProjectService<DS>,
-    protected networkConfig: IProjectNetworkConfig,
-    protected blockDispatcher: B,
+    @Inject('IProjectService') protected projectService: IProjectService<DS>,
+    @Inject('ISubqueryProject') project: ISubqueryProject,
+    @Inject('IBlockDispatcher') protected blockDispatcher: B,
     protected dictionaryService: DictionaryService<DS, FB>,
     private eventEmitter: EventEmitter2,
     private schedulerRegistry: SchedulerRegistry,
-    private unfinalizedBlocksService: IUnfinalizedBlocksServiceUtil,
+    @Inject('IUnfinalizedBlocksService') private unfinalizedBlocksService: IUnfinalizedBlocksServiceUtil,
     private storeCacheService: StoreCacheService,
-    private blockchainSevice: IBlockchainService<DS>
-  ) {}
+    @Inject('IBlockchainService') private blockchainSevice: IBlockchainService<DS>
+  ) {
+    this.networkConfig = project.network;
+  }
 
   private get latestBestHeight(): number {
     assert(this._latestBestHeight, new Error('Latest Best Height is not available'));
@@ -133,8 +131,7 @@ export abstract class BaseFetchService<DS extends BaseDataSource, B extends IBlo
     this.updateDictionary();
     // Find one usable dictionary at start
 
-    await this.preLoopHook({startHeight});
-    await this.initBlockDispatcher();
+    await this.blockDispatcher.init(this.resetForNewDs.bind(this));
 
     void this.startLoop(startHeight);
   }

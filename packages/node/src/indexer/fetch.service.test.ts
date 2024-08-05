@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0
 
 import { ApiPromise, HttpProvider } from '@polkadot/api';
-import { FetchService } from './fetch.service';
+import { FetchService } from '@subql/node-core';
 import { createCachedProvider } from './x-provider/cachedProvider';
 
 const POLKADOT_ENDPOINT = 'https://rpc.polkadot.io';
@@ -10,7 +10,7 @@ const POLKADOT_ENDPOINT = 'https://rpc.polkadot.io';
 // TODO move these tests to Blockchain service
 
 describe('FetchService', () => {
-  let fetchService: FetchService;
+  let fetchService: FetchService<any, any, any>;
   let api: ApiPromise;
 
   beforeAll(async () => {
@@ -32,7 +32,6 @@ describe('FetchService', () => {
       } as any, // UnfinalizedBlocks
       null as any, // EventEmitter
       null as any, // SchedulerRegistry
-      null as any, // RuntimeService
       null as any, // StoreCacheService
       null as any, // BlockchainService
     ) as any;

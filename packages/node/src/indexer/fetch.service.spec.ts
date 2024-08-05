@@ -1,7 +1,7 @@
 // Copyright 2020-2024 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
-import { ProjectService } from '@subql/node-core';
+import { ProjectService, FetchService } from '@subql/node-core';
 import {
   SubstrateBlockHandler,
   SubstrateCallHandler,
@@ -12,7 +12,6 @@ import {
   SubstrateRuntimeHandler,
 } from '@subql/types';
 import { DictionaryQueryEntry } from '@subql/types-core';
-import { FetchService } from './fetch.service';
 
 const projectService: ProjectService<SubstrateDatasource> = {
   getAllDataSources: () => {
@@ -51,7 +50,7 @@ const makeDs = (handlers: SubstrateRuntimeHandler[]) => {
 };
 
 describe('FetchSevice', () => {
-  let fetchService: FetchService & {
+  let fetchService: FetchService<any, any, any> & {
     buildDictionaryQueryEntries: (
       ds: SubstrateDatasource[],
     ) => DictionaryQueryEntry[]; // This is protected so we expose it here
@@ -68,7 +67,6 @@ describe('FetchSevice', () => {
       null as any, // UnfinalizedBlocks
       null as any, // EventEmitter
       null as any, // SchedulerRegistry
-      null as any, // RuntimeService
       null as any, // StoreCacheService
       null as any, // BlockchainService
     ) as any;

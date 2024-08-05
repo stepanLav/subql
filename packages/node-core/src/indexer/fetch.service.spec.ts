@@ -18,12 +18,12 @@ import {
 } from '../';
 import {BlockHeightMap} from '../utils/blockHeightMap';
 import {DictionaryService} from './dictionary/dictionary.service';
-import {BaseFetchService} from './fetch.service';
+import {FetchService} from './fetch.service';
 
 const CHAIN_INTERVAL = 100; // 100ms
 const genesisHash = '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3';
 
-class TestFetchService extends BaseFetchService<BaseDataSource, IBlockDispatcher<any>, any> {
+class TestFetchService extends FetchService<BaseDataSource, IBlockDispatcher<any>, any> {
   finalizedHeight = 1000;
   bestHeight = 20;
 
@@ -87,7 +87,7 @@ const nodeConfig = new NodeConfig({
 const getNetworkConfig = () =>
   ({
     dictionary: 'https://example.com',
-  }) as IProjectNetworkConfig;
+  } as IProjectNetworkConfig);
 
 const mockDs: BaseDataSource = {
   kind: 'mock/DataSource',
@@ -141,7 +141,7 @@ const getDictionaryService = () =>
     initDictionaries: () => {
       /* TODO */
     },
-  }) as any as DictionaryService<any, any>;
+  } as any as DictionaryService<any, any>);
 
 const getBlockDispatcher = () => {
   const inst = {
